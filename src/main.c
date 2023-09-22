@@ -149,6 +149,8 @@ BOOL fn_bProcessCmds( HWND hWnd, WPARAM wParam, LPARAM lParam )
 
 BOOL CALLBACK fn_bTopmostifierDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
+	static UINT s_uTaskbarMsg;
+
 	switch ( uMsg )
 	{
 		case WM_INITDIALOG:
@@ -157,7 +159,9 @@ BOOL CALLBACK fn_bTopmostifierDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 			SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)g_hIconSmall);
 
 			fn_bCreateTrayIcon(hWnd);
-
+			/* needed to handle re-creating tray icon if explorer restarts */
+			s_uTaskbarMsg = RegisterWindowMessage("TaskbarCreated");
+				
 			g_hListWnd = GetDlgItem(hWnd, IDC_WNDLIST);
 			g_hAlpha = GetDlgItem(hWnd, IDC_ALPHASLIDER);
 			g_hTopmost = GetDlgItem(hWnd, IDC_TOPMOST);
@@ -218,6 +222,15 @@ BOOL CALLBACK fn_bTopmostifierDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 			fn_vDeleteTrayIcon(hWnd);
 			PostQuitMessage(0);
 			return TRUE;
+
+		default:
+			if ( uMsg == s_uTaskbarMsg )
+			{
+				/* explorer died and/or was restarted, create the icon again */
+				fn_bCreateTrayIcon(hWnd);
+				return TRUE;
+			}
+			break;
 	}
 
 	return FALSE;
