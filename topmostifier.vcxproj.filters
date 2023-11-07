@@ -48,8 +48,5 @@
     <Image Include="res\app.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="tray.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
 </Project>

@@ -35,6 +35,19 @@ BOOL fn_bProcessCmdsQuick( HWND hWnd, WPARAM wParam, LPARAM lParam )
 	return FALSE;
 }
 
+void fn_vRepositionQuickWnd( HWND hWnd, HWND hOther )
+{
+	RECT stRect = { 0 }, stOwnRect = { 0 }, stBorders = { 0 };
+	GetWindowRect(hOther, &stRect);
+	GetWindowRect(hWnd, &stOwnRect);
+	AdjustWindowRect(&stBorders, GetWindowLong(hOther, GWL_STYLE), FALSE);
+
+	long lX = stRect.right - (stOwnRect.right - stOwnRect.left) - stBorders.right;
+	long lY = (stRect.top >= 0) ? stRect.top : 0; /* necessary for maximized windows */
+
+	SetWindowPos(hWnd, HWND_TOPMOST, lX, lY, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
+}
+
 BOOL CALLBACK fn_bQuickDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
 	switch ( uMsg )
@@ -45,22 +58,17 @@ BOOL CALLBACK fn_bQuickDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			g_hQAlpha = GetDlgItem(hWnd, IDC_ALPHASLIDER);
 			g_hQTopmost = GetDlgItem(hWnd, IDC_TOPMOST);
 
-			RECT stRect = { 0 }, stOwnRect = { 0 }, stBorders = { 0 };
-			GetWindowRect(g_hOther, &stRect);
-			GetWindowRect(hWnd, &stOwnRect);
-			AdjustWindowRect(&stBorders, GetWindowLong(g_hOther, GWL_STYLE), FALSE);
-			stRect.right -= stOwnRect.right - stOwnRect.left + stBorders.right;
-			SetWindowPos(hWnd, HWND_TOPMOST, stRect.right, stRect.top, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
+			fn_vRepositionQuickWnd(hWnd, g_hOther);
 
 			char szTitle[256];
 			GetWindowText(g_hOther, szTitle, sizeof(szTitle));
 			SetDlgItemText(hWnd, IDC_APPNAME, szTitle);
 
-			SendMessage(g_hQAlpha, TBM_SETRANGE, TRUE, MAKELPARAM(C_MinAlpha, C_MaxAlpha));
-			SendMessage(g_hQAlpha, TBM_SETPAGESIZE, 0, C_AlphaStep);
+			Trackbar_SetRange(g_hQAlpha, C_MinAlpha, C_MaxAlpha);
+			Trackbar_SetPageSize(g_hQAlpha, C_AlphaStep);
 
 			Button_SetCheck(g_hQTopmost, fn_bGetTopmost(g_hOther));
-			SendMessage(g_hQAlpha, TBM_SETPOS, TRUE, fn_ucGetAlpha(g_hOther));
+			Trackbar_SetPos(g_hQAlpha, fn_ucGetAlpha(g_hOther));
 
 			return TRUE;
 		}
@@ -75,7 +83,7 @@ BOOL CALLBACK fn_bQuickDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_HSCROLL:
 			if ( (HWND)lParam == g_hQAlpha )
 			{
-				int pos = SendMessage(g_hQAlpha, TBM_GETPOS, 0, 0);
+				int pos = Trackbar_GetPos(g_hQAlpha);
 				fn_vSetAlpha(g_hOther, pos);
 				fn_vUpdateMainControls();
 				return TRUE;

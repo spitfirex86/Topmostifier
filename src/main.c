@@ -91,19 +91,19 @@ void fn_vUpdateControls( void )
 	fn_vGetSelectionInfo();
 	if ( g_hSelWnd )
 	{
-		EnableWindow(g_hAlpha, TRUE);
 		EnableWindow(g_hTopmost, TRUE);
+		EnableWindow(g_hAlpha, TRUE);
 
 		Button_SetCheck(g_hTopmost, fn_bGetTopmost(g_hSelWnd));
-		SendMessage(g_hAlpha, TBM_SETPOS, TRUE, fn_ucGetAlpha(g_hSelWnd));
+		Trackbar_SetPos(g_hAlpha, fn_ucGetAlpha(g_hSelWnd));
 	}
 	else
 	{
-		EnableWindow(g_hAlpha, FALSE);
 		EnableWindow(g_hTopmost, FALSE);
+		EnableWindow(g_hAlpha, FALSE);
 
 		Button_SetCheck(g_hTopmost, FALSE);
-		SendMessage(g_hAlpha, TBM_SETPOS, TRUE, 0);
+		Trackbar_SetPos(g_hAlpha, 0);
 	}
 }
 
@@ -166,9 +166,9 @@ BOOL CALLBACK fn_bTopmostifierDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 			g_hAlpha = GetDlgItem(hWnd, IDC_ALPHASLIDER);
 			g_hTopmost = GetDlgItem(hWnd, IDC_TOPMOST);
 
-			SendMessage(g_hAlpha, TBM_SETRANGE, TRUE, MAKELPARAM(C_MinAlpha, C_MaxAlpha));
-			SendMessage(g_hAlpha, TBM_SETPAGESIZE, 0, C_AlphaStep);
-			SendMessage(g_hAlpha, TBM_SETPOS, TRUE, C_MaxAlpha);
+			Trackbar_SetRange(g_hAlpha, C_MinAlpha, C_MaxAlpha);
+			Trackbar_SetPageSize(g_hAlpha, C_AlphaStep);
+			Trackbar_SetPos(g_hAlpha, C_MaxAlpha);
 
 			/* TODO: make this customizable */
 			RegisterHotKey(hWnd, WM_HK_QUICK, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, 'W');
@@ -190,7 +190,7 @@ BOOL CALLBACK fn_bTopmostifierDlgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 			{
 				if ( g_hSelWnd )
 				{
-					int pos = SendMessage(g_hAlpha, TBM_GETPOS, 0, 0);
+					int pos = Trackbar_GetPos(g_hAlpha);
 					fn_vSetAlpha(g_hSelWnd, pos);
 					//fn_vUpdateControls();
 				}

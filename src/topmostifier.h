@@ -8,6 +8,12 @@
 #define M_IsAlpha(ucAlpha) ((ucAlpha)<C_MaxAlpha)
 
 
+#define Trackbar_GetPos(hwndCtl) ((int)SNDMSG((hwndCtl), TBM_GETPOS, 0, 0))
+#define Trackbar_SetPos(hwndCtl, pos) ((void)SNDMSG((hwndCtl), TBM_SETPOS, TRUE, (LPARAM)(pos)))
+#define Trackbar_SetRange(hwndCtl, uwMin, uwMax) ((void)SNDMSG((hwndCtl), TBM_SETRANGE, TRUE, MAKELPARAM((uwMin), (uwMax))))
+#define Trackbar_SetPageSize(hwndCtl, size) ((int)SNDMSG((hwndCtl), TBM_SETPAGESIZE, 0, (LPARAM)(size)))
+
+
 /*
  * main.c
  */
